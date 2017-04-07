@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Awesome Title Here</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<style type="text/css">
+		body {
+			background: #ccc;
+		}
+		#container {
+			width: 80%;
+			background: #fff;
+			margin: 0 auto;
+			padding: 15px;
+		}
+		.update {
+			color: orange;
+		}
+		.error {
+			color: #f00;
+		}
+		.success {
+			color: #090;
+		}
+
+		button {
+			margin: 10px;
+		}
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		table thead {
+			text-align: left;
+		}
+		table th {
+			padding: 10px;
+		}
+		table tbody tr {
+			border: 1px solid #aaf;
+			transition: 0.3s;
+		}
+		table tbody tr:hover {
+			background-color: #e5eeee;
+		}
+		table td {
+			padding: 10px;
+		}
+
+		#discover tbody tr:hover {
+			cursor: pointer;
+		}
+	</style>
+
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			$(".clickable-row").click(function() {
+				window.location = $(this).data("href");
+				alert("Test");
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="container">
+		<h1>Awesome IoT Updater</h1>
+		<h3>Discover Devices</h3>
+		<form id="frmDiscover">
+			<table id="discover">
+				<thead>
+					<tr>
+						<th>Device</th>
+						<th>Device ID</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="clickable-row" data-href="#">
+						<td>Philip's Hue Lightbulb</td>
+						<td>51651832</td>
+					</tr>
+					<tr class="clickable-row" data-href="#">
+						<td>Samsung Television</td>
+						<td>15231651</td>
+					</tr>
+				</tbody>
+			</table>
+			<button value="Discover" type="Submit">Discover</button>
+		</form>
+
+		<h3>Connected Devices</h3>
+		<form id="frmDiscover">
+			<table id="connected">
+				<thead>
+					<tr>
+						<th>Device</th>
+						<th>Status</th>
+						<th>Firmware</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Netgear Router</td>
+						<td><span class="success">Online</span></td>
+						<td>3.2.14</td>
+						<td><a href="#">Delete</a></td>
+					</tr>
+					<tr>
+						<td>Smart Car</td>
+						<td><span class="update">Firmware Update Available (9.2a)</span></td>
+						<td>8.93b</td>
+						<td><a href="#">Update</a>, <a href="#">Delete</a></td>
+					</tr>
+					<tr>
+						<td>Emerson Television</td>
+						<td><span class="error">Offline</span></td>
+						<td>21.75</td>
+						<td><a href="#">Delete</a></td>
+					</tr>
+				</tbody>
+			</table>
+			<button value="Update All" type="Submit">Update All</button>
+		</form>
+
+		<h3>Settings</h3>
+		<form id="frmSettings">
+			<label for="Email">Email: <input type="text" name="Email" /></label>
+			<button value="Save" type="Submit">Save</button>
+		</form>
+	</div>
+</body>
+</html>
