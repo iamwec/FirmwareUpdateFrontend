@@ -1,5 +1,5 @@
 <?php
-
+include_once('total.php');
 ?>
 
 <!DOCTYPE html>
