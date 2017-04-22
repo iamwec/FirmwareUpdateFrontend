@@ -1,0 +1,47 @@
+body {
+	background: #ccc;
+}
+#container {
+	width: 80%;
+	background: #fff;
+	margin: 0 auto;
+	padding: 15px;
+}
+.update {
+	color: orange;
+}
+.error {
+	color: #f00;
+}
+.success {
+	color: #090;
+}
+
+button {
+	margin: 10px;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+table thead {
+	text-align: left;
+}
+table th {
+	padding: 10px;
+}
+table tbody tr {
+	border: 1px solid #aaf;
+	transition: 0.3s;
+}
+table tbody tr:hover {
+	background-color: #e5eeee;
+}
+table td {
+	padding: 10px;
+}
+
+#discover tbody tr:hover {
+	cursor: pointer;
+}
