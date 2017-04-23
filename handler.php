@@ -7,17 +7,32 @@ switch($Task) {
 	// get file saved by endpoint.php
 	case 'get_enroll':
 		$filename = 'enroll.json';
-		echo get_file_data($filename);
+		$returnData = get_file_data($filename);
+		if (!empty($returnData)) {
+			echo $returnData;
+		}
 		break;
 
 	case 'get_discoveryResults':
 		$filename = 'discoveryResults.json';
-		echo get_file_data($filename);
+		$statuses = json_decode(get_file_data($filename), true);
+		if(sizeof($statuses) > 0) {
+			$deviceData = json_decode(get_file_data('enroll.json'), true)['devices'];
+			for ($i = 0; $i < sizeof($deviceData); $i++) {
+				if(in_array($deviceData[$i]['deviceId'], $statuses['registeredDevices']))
+					$deviceData[$i]['status'] = '<span class="success">Registered</span>';
+				if(in_array($deviceData[$i]['deviceId'], $statuses['failedVerification']))
+					$deviceData[$i]['status'] = '<span class="error">Invalid Accessory Code</span>';
+				if(in_array($deviceData[$i]['deviceId'], $statuses['failedToRespond']))
+					$deviceData[$i]['status'] = '<span class="warning">Device Did Not Respond</span>';
+			}
+			echo json_encode($deviceData);
+		}
 		break;
 
 	// Call serviceURL/enroll to start enrollment, start jquery check to get_enroll for 120 seconds
 	case 'start_enrollment':
-		post_data('enroll');
+		post_data('enroll', '');
 		break;
 
 	// Call serviceURL/accessoryValidation and send info
@@ -29,7 +44,7 @@ switch($Task) {
 			$i = 0;
 			foreach ($accCodes as $code) {
 				$tmpArr[$i]['deviceId'] = substr($code['name'], 9);
-				$tmpArr[$i]['deviceId'] = substr($returnArr[$i]['deviceId'], 0, -1);
+				$tmpArr[$i]['deviceId'] = substr($tmpArr[$i]['deviceId'], 0, -1);
 				$tmpArr[$i]['accessoryCode'] = $code['value'];
 				$i++;
 			}
@@ -40,27 +55,31 @@ switch($Task) {
 
 	// call serviceURL/applyUpdates
 	case 'start_applyUpdate':
-		post_data('applyUpdates');
+		post_data('applyUpdates', '');
 		break;
 
 	// call serviceURL/searchForUpdates
 	case 'start_searchForUpdates':
-		post_data('searchForUpdates');
+		post_data('searchForUpdates', '');
 		break;
-
-	// /resumeUpdate/{deviceId}
-	// ??
 
 	// call serviceURL/unenroll/{deviceId}
 	case 'delete':
 		$deviceID = $_POST['deviceID'];
 		if (!empty($deviceID)) {
-			//call
+			post_data('unenroll/'.$deviceID, '');
 		}
 		break;
 
 	// /kill
+	case 'kill':
+		post_data('kill', '');
+		break;
+
 	// /resetApp
+	case 'resetApp':
+		post_data('resetApp', '');
+		break;
 
 	default:
 		break;
@@ -70,19 +89,18 @@ function get_file_data($filename) {
 	if(file_exists($filename) && filesize($filename) > 0) {
 		$fh = fopen($filename, 'r');
 		$data = fread($fh, filesize($filename));
-		echo $data;
 		fclose($fh);
-		//unlink($filename);
+		return $data;
 	} else {
 		// Return nothing here, null means nothing found
 	}
 }
 
-function post_data($endpoint, $data = array()) {
-	$test = ServiceURL.$endpoint;
+function post_data($endpoint, $data) {
 	$ch = curl_init(ServiceURL.$endpoint);
 	$curlOptArr = array(
-		CURLOPT_HTTPHEADER => 'POST',
+		CURLOPT_HTTPHEADER => array("Content-type: application/json"),
+		CURLOPT_POST => 1,
 		CURLOPT_TIMEOUT => 2,
 		CURLOPT_POSTFIELDS => $data
 	);

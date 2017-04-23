@@ -1,0 +1,13 @@
+{
+  "status": {
+    "status": "COMPLETE",
+    "message": "Devices were registered"
+  },
+  "registeredDevices": [
+    "007", "123a456s456d789"
+  ],
+  "failedVerification": [],
+  "failedToRespond": [
+  	"abc1def2ghi3jkl"
+  ]
+}
