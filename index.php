@@ -18,18 +18,21 @@ include_once('total.php');
 	<link rel="stylesheet" href="style.css">
 
 	<script type="text/javascript">
+		var discoverTable = null;
+		var connectedTable = null;
+
 		jQuery(document).ready(function($) {
 			$(".clickable-row").click(function() {
 				window.location = $(this).data("href");
 			});
 
 			// Instantiate DataTables
-			$('#discover').DataTable({
+			discoverTable = $('#discover').DataTable({
 				searching: false,
 				paging: false,
 				info: false
 			});
-			$('#connected').DataTable({
+			connectedTable = $('#connected').DataTable({
 				searching: false,
 				paging: false,
 				info: false
@@ -37,17 +40,84 @@ include_once('total.php');
 			// !End Instantiating DataTables
 		});
 
+		var discoveryCheck = null;
+		var discoveryCheckCount = 0;
 		function start_discovery() {
-
+			discoveryCheck = setInterval(check_discovery, 1000);
 		}
 		
 		function check_discovery() {
+			discoveryCheckCount++;
+			if (discoveryCheckCount == 120)
+				clearInterval(discoveryCheck);
 			$.ajax({
 				type: "POST",
 				url: "handler.php",
-				data: {'Task': 'get'},
+				data: {'Task': 'get_enroll'},
 				success: function(response){
-					alert(response);
+					if (response.length > 1) {
+						clearInterval(discoveryCheck);
+						discoverTable.rows().remove().draw();
+
+						devices = JSON.parse(response);
+						devices.devices.forEach(function(element) {
+							var rowNode = discoverTable.row.add([
+								element.productName,
+								element.vendor,
+								element.deviceId,
+								'<input type="textbox" name="accCodes['+element.deviceId+']" />'
+							]).draw(false).node();
+						});
+
+						$("#SendAccessory").show();
+					}
+				},
+				error: function() {},
+			});
+		}
+
+		function send_accessory_codes() {
+			$.ajax({
+				type: "POST",
+				url: "handler.php",
+				data: {'Task' : 'send_accessoryValidation', 'accCodes' : $('#frmDiscover').serializeArray() },
+				success: function(response){
+					start_accessory_check();
+				},
+				error: function() {},
+			});
+		}
+
+		var accessoryCheck = null;
+		var accCheckCount = 0;
+		function start_accessory_check() {
+			accessoryCheck = setInterval(check_accessory, 1000);
+		}
+
+		function check_accessory() {
+			accCheckCount++;
+			if (accCheckCount == 120)
+				clearInterval(accessoryCheck);
+			$.ajax({
+				type: "POST",
+				url: "handler.php",
+				data: {'Task': 'get_discoveryResults'},
+				success: function(response){
+					if (response.length > 1) {
+						clearInterval(accessoryCheck);
+					}
+				},
+				error: function() {},
+			});
+		}
+
+		function send_generic_message(task) {
+			$.ajax({
+				type: "POST",
+				url: "handler.php",
+				data: {'Task' : task },
+				success: function(response){
+					//
 				},
 				error: function() {},
 			});
@@ -63,21 +133,15 @@ include_once('total.php');
 				<thead>
 					<tr>
 						<th>Device</th>
+						<th>Vendor</th>
 						<th>Device ID</th>
+						<th>Enter Accessory Code</th>
 					</tr>
 				</thead>
-				<tbody>
-					<tr class="clickable-row" data-href="#">
-						<td>Philip's Hue Lightbulb</td>
-						<td>51651832</td>
-					</tr>
-					<tr class="clickable-row" data-href="#">
-						<td>Samsung Television</td>
-						<td>15231651</td>
-					</tr>
-				</tbody>
+				<tbody></tbody>
 			</table>
-			<button value="Discover" type="Submit">Discover</button>
+			<button value="Discover" type="button" onclick="start_discovery();">Discover</button>
+			<button id="SendAccessory" value="SendAccessory" type="button" style="display: none;" onclick="send_accessory_codes();">Send Accessory Codes</button>
 		</form>
 
 		<h3>Connected Devices</h3>
@@ -112,7 +176,7 @@ include_once('total.php');
 					</tr>
 				</tbody>
 			</table>
-			<button value="Update All" type="Submit">Update All</button>
+			<button value="Update All" type="button" onclick="send_generic_message('start_applyUpdate');">Update All</button>
 		</form>
 
 		<h3>Settings</h3>
