@@ -32,7 +32,7 @@ switch($Task) {
 
 	// Call serviceURL/enroll to start enrollment, start jquery check to get_enroll for 120 seconds
 	case 'start_enrollment':
-		post_data('enroll', '');
+		call_service('discovery/enroll');
 		break;
 
 	// Call serviceURL/accessoryValidation and send info
@@ -49,36 +49,36 @@ switch($Task) {
 				$i++;
 			}
 			$returnArr['devices'] = $tmpArr;
-			post_data('accessoryValidation', json_encode($returnArr));
+			call_service('discovery/accessoryValidation', 'POST', json_encode($returnArr));
 		}
 		break;
 
 	// call serviceURL/applyUpdates
 	case 'start_applyUpdate':
-		post_data('applyUpdates', '');
+		call_service('distributionService/applyUpdates');
 		break;
 
 	// call serviceURL/searchForUpdates
 	case 'start_searchForUpdates':
-		post_data('searchForUpdates', '');
+		call_service('updateService/searchForUpdates');
 		break;
 
 	// call serviceURL/unenroll/{deviceId}
 	case 'delete':
 		$deviceID = $_POST['deviceID'];
 		if (!empty($deviceID)) {
-			post_data('unenroll/'.$deviceID, '');
+			call_service('system/unenroll/'.$deviceID);
 		}
 		break;
 
 	// /kill
 	case 'kill':
-		post_data('kill', '');
+		call_service('system/kill');
 		break;
 
 	// /resetApp
 	case 'resetApp':
-		post_data('resetApp', '');
+		call_service('system/resetApp');
 		break;
 
 	default:
@@ -96,14 +96,20 @@ function get_file_data($filename) {
 	}
 }
 
-function post_data($endpoint, $data) {
+function call_service($endpoint, $method = 'GET', $data = '') {
 	$ch = curl_init(ServiceURL.$endpoint);
 	$curlOptArr = array(
-		CURLOPT_HTTPHEADER => array("Content-type: application/json"),
-		CURLOPT_POST => 1,
 		CURLOPT_TIMEOUT => 2,
-		CURLOPT_POSTFIELDS => $data
+		CURLOPT_RETURNTRANSFER => 1
 	);
+	if($method == 'POST') {
+		$postOptArr = array(
+			CURLOPT_HTTPHEADER => array("Content-type: application/json"),
+			CURLOPT_POST => 1,
+			CURLOPT_POSTFIELDS => $data
+		);
+		$curlOptArr = array_merge($curlOptArr, $postOptArr);
+	}
 
 	curl_setopt_array($ch, $curlOptArr);
 

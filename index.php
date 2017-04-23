@@ -203,6 +203,7 @@ include_once('total.php');
 					</thead>
 					<tbody></tbody>
 				</table>
+				<button value="Search for Updates" type="button" onclick="send_generic_message('start_searchForUpdates');">Search for Updates</button>
 				<button value="Update All" type="button" onclick="send_generic_message('start_applyUpdate');">Update All</button>
 			</form>
 		</div>
