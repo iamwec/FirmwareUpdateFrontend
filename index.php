@@ -102,7 +102,7 @@ include_once('total.php');
 		var accCheckCount = 0;
 		function start_accessory_check() {
 			accCheckCount = 0;
-			accessoryCheck = setInterval(check_accessory, 1000);
+			accessoryCheck = setInterval(check_accessory, 2500);
 		}
 
 		function check_accessory() {

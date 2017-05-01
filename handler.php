@@ -15,18 +15,27 @@ switch($Task) {
 
 	case 'get_discoveryResults':
 		$filename = 'discoveryResults.json';
-		$statuses = json_decode(get_file_data($filename), true);
-		if(sizeof($statuses) > 0) {
+		$statusData = get_file_data($filename);
+		if(!empty($statusData) > 0) {
 			$deviceData = json_decode(get_file_data('enroll.json'), true)['devices'];
+			$statusData = explode(PHP_EOL, $statusData);
+			array_pop($statusData);
+
 			for ($i = 0; $i < sizeof($deviceData); $i++) {
-				if(in_array($deviceData[$i]['deviceId'], $statuses['registeredDevices']))
-					$deviceData[$i]['status'] = '<span class="success">Registered</span>';
-				if(in_array($deviceData[$i]['deviceId'], $statuses['failedVerification']))
-					$deviceData[$i]['status'] = '<span class="error">Invalid Accessory Code</span>';
-				if(in_array($deviceData[$i]['deviceId'], $statuses['failedToRespond']))
-					$deviceData[$i]['status'] = '<span class="warning">Device Did Not Respond</span>';
+				foreach ($statusData as $statuses) {
+					$statuses = json_decode($statuses, true);
+					if($deviceData[$i]['deviceId'] == $statuses['registeredDevices'][0])
+						$deviceData[$i]['status'] = '<span class="success">Registered</span>';
+					else if($deviceData[$i]['deviceId'] == $statuses['failedVerification'][0])
+						$deviceData[$i]['status'] = '<span class="error">Invalid Accessory Code</span>';
+					else if($deviceData[$i]['deviceId'] == $statuses['failedToRespond'][0])
+						$deviceData[$i]['status'] = '<span class="warning">Device Did Not Respond</span>';
+				}
 			}
 			echo json_encode($deviceData);
+
+			if (file_exists('enroll.json')) unlink('enroll.json');
+			if (file_exists('discoveryResults.json')) unlink('discoveryResults.json');
 		}
 		break;
 
@@ -48,7 +57,7 @@ switch($Task) {
 				$tmpArr[$i]['accessoryCode'] = $code['value'];
 				$i++;
 			}
-			$returnArr['devices'] = $tmpArr;
+			$returnArr['codes'] = $tmpArr;
 			call_service('discovery/accessoryValidation', 'POST', json_encode($returnArr));
 		}
 		break;
@@ -108,7 +117,7 @@ function call_service($endpoint, $method = 'GET', $data = '') {
 			CURLOPT_POST => 1,
 			CURLOPT_POSTFIELDS => $data
 		);
-		$curlOptArr = array_merge($curlOptArr, $postOptArr);
+		$curlOptArr = $curlOptArr + $postOptArr;
 	}
 
 	curl_setopt_array($ch, $curlOptArr);

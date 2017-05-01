@@ -12,7 +12,7 @@ if (!empty($body)) {
 			break;
 		case 'discoveryResults':
 			// Discovery results returns list 
-			$fh = fopen('discoveryResults.json', 'w');
+			$fh = fopen('discoveryResults.json', 'a');
 			break;
 		default:
 			$fh = fopen('response.json', 'w');
@@ -20,7 +20,7 @@ if (!empty($body)) {
 	}
 
 	// Write the response to file, wait for handler to pick it up
-	fwrite($fh, $body);
+	fwrite($fh, $body.PHP_EOL);
 
 	// Close the file
 	fclose($fh);
